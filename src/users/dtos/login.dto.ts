@@ -5,8 +5,8 @@ import { MutationOutput } from './../../common/dtos/output.dto';
 
 @ObjectType()
 export class LoginOutput extends MutationOutput{
-    @Field(()=>String)
-    token : string 
+    @Field(()=>String, {nullable:true})
+    token? : string 
 }
 
 @InputType()

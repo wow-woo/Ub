@@ -1,7 +1,7 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { CoreEntity } from "src/common/entities/core.entity";
 import { BeforeInsert, Column, Entity } from "typeorm";
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 
 enum UserRoles {
@@ -31,6 +31,17 @@ export class User extends CoreEntity{
     async hashPassword(){
         try {
             this.password  = await bcrypt.hash(this.password, 10)
+        } catch (error) {
+            console.log(error)
+            throw new InternalServerErrorException()
+        }
+    }
+
+    //entity could have methods called by itself
+    async checkPassword(aPassword:string) : Promise<boolean> {
+        try {
+            const ok =await bcrypt.compare(aPassword, this.password)
+            return ok;
         } catch (error) {
             console.log(error)
             throw new InternalServerErrorException()
