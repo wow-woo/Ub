@@ -21,8 +21,8 @@ export class UsersResolver {
 
         } catch (error) {
             return {
-                ok:false,
                 error,
+                ok:false,
             }
             
         }
