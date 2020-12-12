@@ -1,10 +1,10 @@
 import { PickType } from '@nestjs/graphql';
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { User } from '../entities/user.entity';
-import { MutationOutput } from './../../common/dtos/output.dto';
+import { CoreOutput } from './../../common/dtos/output.dto';
 
 @ObjectType()
-export class LoginOutput extends MutationOutput{
+export class LoginOutput extends CoreOutput{
     @Field(()=>String, {nullable:true})
     token? : string 
 }

@@ -1,11 +1,12 @@
+import { EditProfileInp } from './dtos/edit-profile.dto';
 import { JwtService } from './../jwt/jwt.service';
-import { ConfigService } from '@nestjs/config';
 import { LoginInp } from './dtos/login.dto';
 import { CreateAccountInp } from './dtos/create-account.dto';
 import { User } from './entities/user.entity';
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt'
 @Injectable()
 export class UsersService {
     constructor(
@@ -63,5 +64,15 @@ export class UsersService {
 
     async findById(id:number):Promise<User>{
         return this.users.findOne({id});
+    }
+
+    async editProfile(userId :number, inp: EditProfileInp){
+        console.log('a', inp)
+        console.log('b', {...inp})
+        if(inp.password){
+            inp.password = await bcrypt.hash(inp.password, 10)
+        }
+        const result = await this.users.update({id:userId}, {...inp})
+        return result
     }
 }

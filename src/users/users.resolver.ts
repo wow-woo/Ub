@@ -1,3 +1,4 @@
+import { EditProfileOutput, EditProfileInp } from './dtos/edit-profile.dto';
 import { AuthGuard } from './../auth/auth.guard';
 import { User } from './entities/user.entity';
 import { LoginOutput, LoginInp } from './dtos/login.dto';
@@ -6,6 +7,7 @@ import { UsersService } from './users.service';
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { UseGuards } from '@nestjs/common';
 import { AuthUser } from 'src/auth/auth-user.decorator';
+import { UserProfileInp, UserProfileOutput } from './dtos/user-profile.dto';
 
 @Resolver()
 export class UsersResolver {
@@ -44,11 +46,63 @@ export class UsersResolver {
         }
     }
 
-    @Query(()=>User, {nullable:true})
     @UseGuards(AuthGuard)
+    @Query(()=>User, {nullable:true})
     me(
         @AuthUser() authUser:User
     ){
         return authUser        
     }
+
+    @UseGuards(AuthGuard)
+    @Query(()=>UserProfileOutput)
+    async userProfile(
+        @Args() profile:UserProfileInp
+    ):Promise<UserProfileOutput>{
+        try {
+            const user = await this.userService.findById(profile.userId)
+            
+            if(!user){
+                throw new Error()
+            }
+            return {
+                ok: true,
+                user
+            }
+        } catch (error) {
+            return {
+                ok:false,
+                error:'User not found'
+            }
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @Mutation(()=>EditProfileOutput)
+    async editProfile(
+        @AuthUser() authUser:User,
+        @Args('inp') editInp:EditProfileInp
+    ): Promise<EditProfileOutput>{
+        try {
+            const updated = await this.userService.editProfile(authUser.id, editInp)
+       
+            if(!updated){
+                return {
+                    ok:false,
+                    error:'Update has been failed'
+                }
+            }
+
+            return {
+                ok:true
+            }
+        } catch (error) {
+            return {
+                ok:false,
+                error
+            }
+        }
+
+    }
+    
 }
