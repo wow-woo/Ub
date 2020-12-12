@@ -26,6 +26,10 @@ export class User extends CoreEntity{
     @Field(()=>UserRoles)
     @Column( { type:'enum', enum: UserRoles})
     role:UserRoles
+    
+    @Field(()=>Boolean, {nullable:true, defaultValue:false})
+    @Column({default:false})
+    emailVerified:boolean
 
     @BeforeInsert()
     async hashPassword(){

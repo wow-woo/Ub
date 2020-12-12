@@ -1,3 +1,4 @@
+import { VerifyEmailOutput, VerifyEmailInp } from './dtos/verify-email.dto';
 import { EditProfileOutput, EditProfileInp } from './dtos/edit-profile.dto';
 import { AuthGuard } from './../auth/auth.guard';
 import { User } from './entities/user.entity';
@@ -102,6 +103,14 @@ export class UsersResolver {
                 error
             }
         }
+
+    }
+
+    @Mutation(()=>VerifyEmailOutput)
+    verifyEmail(
+        @Args('inp') {code}:VerifyEmailInp
+    ){
+        this.userService.verifyEmail(code)
 
     }
     

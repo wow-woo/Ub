@@ -1,3 +1,4 @@
+import { Verification } from './entities/verification.entity';
 import { EditProfileInp } from './dtos/edit-profile.dto';
 import { JwtService } from './../jwt/jwt.service';
 import { LoginInp } from './dtos/login.dto';
@@ -12,6 +13,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User) 
         private readonly users:Repository<User>,
+        @InjectRepository(Verification) 
+        private readonly Verifications:Repository<Verification>,
         private readonly jwtService:JwtService,
     ){}
 
@@ -22,7 +25,9 @@ export class UsersService {
                 return {ok:false, error:'The email is already registered'}
             }
 
-            await this.users.save(this.users.create({email, password, role}))
+            const user = await this.users.save(this.users.create({email, password, role}))
+            await this.Verifications.save(this.Verifications.create({user}))
+
             return {ok:true}
         } catch (err) {
             console.log(err)
@@ -67,12 +72,26 @@ export class UsersService {
     }
 
     async editProfile(userId :number, inp: EditProfileInp){
-        console.log('a', inp)
-        console.log('b', {...inp})
+        const user = await this.users.findOne(userId)
+
+        if(inp.email){
+            inp.emailVerified = false;
+            await this.Verifications.create(this.Verifications.create({user}))
+        }
+  
         if(inp.password){
             inp.password = await bcrypt.hash(inp.password, 10)
         }
         const result = await this.users.update({id:userId}, {...inp})
         return result
+    }
+
+    async verifyEmail(code:string):Promise<boolean>{
+        const verification = await this.Verifications.findOne({code}, { relations:['user']})
+        if(verification){
+            verification.user.emailVerified = true
+            this.users.save(verification.user)
+        }
+        return 
     }
 }
