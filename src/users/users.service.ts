@@ -1,3 +1,4 @@
+import { MailService } from './../mailer/mail.service';
 import { Verification } from './entities/verification.entity';
 import { EditProfileInp } from './dtos/edit-profile.dto';
 import { JwtService } from './../jwt/jwt.service';
@@ -8,6 +9,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
+import { VerifyEmailOutput } from './dtos/verify-email.dto';
 @Injectable()
 export class UsersService {
     constructor(
@@ -16,6 +18,7 @@ export class UsersService {
         @InjectRepository(Verification) 
         private readonly Verifications:Repository<Verification>,
         private readonly jwtService:JwtService,
+        private readonly mailService:MailService,
     ){}
 
     async createAccount({email,password, role}:CreateAccountInp):Promise<{ok:boolean, error?:string}>{
@@ -26,7 +29,9 @@ export class UsersService {
             }
 
             const user = await this.users.save(this.users.create({email, password, role}))
-            await this.Verifications.save(this.Verifications.create({user}))
+            const verification = await this.Verifications.save(this.Verifications.create({user}))
+
+            this.mailService.sendVerificationEmail(user.email, verification.code)
 
             return {ok:true}
         } catch (err) {
@@ -76,7 +81,8 @@ export class UsersService {
 
         if(inp.email){
             inp.emailVerified = false;
-            await this.Verifications.create(this.Verifications.create({user}))
+            const verification = await this.Verifications.create({user})
+            this.mailService.sendVerificationEmail(user.email, verification.code)
         }
   
         if(inp.password){
@@ -86,12 +92,29 @@ export class UsersService {
         return result
     }
 
-    async verifyEmail(code:string):Promise<boolean>{
-        const verification = await this.Verifications.findOne({code}, { relations:['user']})
-        if(verification){
-            verification.user.emailVerified = true
-            this.users.save(verification.user)
+    async verifyEmail(code:string):Promise<VerifyEmailOutput>{
+        try {
+            const verification = await this.Verifications.findOne(
+                {code}, { relations:['user']}
+            )
+
+            if(verification){
+                verification.user.emailVerified = true
+                await this.users.save(verification.user)
+                await this.Verifications.delete(verification.id)
+    
+                return {ok:true}
+            }
+
+            return {
+                ok:false,
+                error:'Verification failed'
+            }
+        } catch (error) {
+            return {
+                ok:false,
+                error
+            }
         }
-        return 
     }
 }
