@@ -1,3 +1,4 @@
+import { SendEmailOutput } from './dtos/sendEmail.dto';
 import { MailModuleOptions, EmailVar } from './mail.interfaces';
 import { CONFIG_OPTIONS } from './../common/common.constants';
 import { Inject, Injectable } from '@nestjs/common';
@@ -11,12 +12,12 @@ export class MailService {
         private readonly options:MailModuleOptions
     ){}
     
-    private async sendEmail(
+    async sendEmail(
         subject:string, 
         template:string, 
         e:EmailVar[],
         // to:string
-        ){
+        ):Promise<SendEmailOutput>{
         const form = new FormData()
         form.append("from", `mailingCowboy from Ub <mailgun@${this.options.domain}>`)
         form.append("to", "inforphones@gamil.com")
@@ -26,16 +27,23 @@ export class MailService {
         form.append("v:code", "thisiscodemannnnn")
         e.forEach(item=> form.append(`v:${item.key}`, item.value))
         try {
-            const res = await got(`https://api.mailgun.net/v3/${this.options.domain}/messages/`, 
+            const res = await got.post(`https://api.mailgun.net/v3/${this.options.domain}/messages/`, 
             {
                 method:'POST',
                 headers:{
                     Authorization:`Basic ${Buffer.from(`api:${this.options.apiKey}`).toString('base64')}`
                 },
                 body:form
-            })    
+            })
+            
+            return {
+                ok:true
+            }
         } catch (error) {
-            console.log('error', error)
+            return {
+                ok:false,
+                error:'Failed on sending an verification mail'
+            }
         }
     }
 

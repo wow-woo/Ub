@@ -6,6 +6,13 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt'
+
+jest.mock('bcrypt', ()=>{
+    return {
+        hash: jest.fn(()=>'hashedPassword')
+    }
+})
 
 const mockRepository = ()=>({
     findOne:jest.fn(),
@@ -268,16 +275,23 @@ describe('UsersService', ()=>{
         });
 
         it('Should change password', async()=>{
+            const editProfileArgs = {
+                userId:1,
+                inp: {  password:'newPassword'},
+            };
+                    
             usersRepository.findOne.mockResolvedValue({password:'old'})
             usersRepository.update.mockResolvedValue(undefined)
             
+            expect(bcrypt.hash).toHaveBeenCalledTimes(1)
+            const hashed = await bcrypt.hash("newPassword", 10)
+            expect(bcrypt.hash).toHaveBeenCalledWith("newPassword", 10)
+            expect(hashed).toEqual('hashedPassword')
+
             const result = await service.editProfile(editProfileArgs.userId, editProfileArgs.inp)
             expect(usersRepository.update).toHaveBeenCalledTimes(1)
             expect(usersRepository.update).toHaveBeenCalledWith(
-                {
-                    id:editProfileArgs.userId,
-                    ...editProfileArgs.inp
-                }
+                {id:1}, { password: "hashedPassword"}
             )
             expect(result).toEqual(
                 {ok:true}
