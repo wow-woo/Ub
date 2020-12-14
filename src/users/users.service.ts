@@ -1,6 +1,6 @@
 import { MailService } from './../mailer/mail.service';
 import { Verification } from './entities/verification.entity';
-import { EditProfileInp } from './dtos/edit-profile.dto';
+import { EditProfileInp, EditProfileOutput } from './dtos/edit-profile.dto';
 import { JwtService } from './../jwt/jwt.service';
 import { LoginInp } from './dtos/login.dto';
 import { CreateAccountInp } from './dtos/create-account.dto';
@@ -10,6 +10,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { VerifyEmailOutput } from './dtos/verify-email.dto';
+import { UserProfileOutput } from './dtos/user-profile.dto';
 @Injectable()
 export class UsersService {
     constructor(
@@ -35,7 +36,6 @@ export class UsersService {
 
             return {ok:true}
         } catch (err) {
-            console.log(err)
             return {ok:false, error:'Creating Account failed'}
         }
     }
@@ -72,24 +72,48 @@ export class UsersService {
         }
     }
 
-    async findById(id:number):Promise<User>{
-        return this.users.findOne({id});
+    async findById(id:number):Promise<UserProfileOutput>{
+        try {
+            const user = await this.users.findOneOrFail({id});
+
+            return {
+                ok:true,
+                user:user
+            } 
+        } catch (error) {
+            return {
+                ok:false,
+                error:"User not found"
+            }            
+        }
     }
 
-    async editProfile(userId :number, inp: EditProfileInp){
-        const user = await this.users.findOne(userId)
+    async editProfile(userId :number, inp: EditProfileInp):Promise<EditProfileOutput>{
+        try {
+            const user = await this.users.findOne(userId)
 
-        if(inp.email){
-            inp.emailVerified = false;
-            const verification = await this.Verifications.create({user})
-            this.mailService.sendVerificationEmail(user.email, verification.code)
+            if(inp.email){
+                user.email = inp.email
+                user.emailVerified = false;
+                const newVerification = await this.Verifications.create({user})
+                const verification = await this.Verifications.save(newVerification)
+                this.mailService.sendVerificationEmail(user.email, verification.code)
+            }
+            if(inp.password){
+                inp.password = await bcrypt.hash(inp.password, 10)
+            }
+            
+            await this.users.update({id:userId}, {...inp})
+            return {
+                ok:true
+            }
+        } catch (error) {
+            return {
+                ok:false,
+                error:'Profile update has been failed'
+            }
         }
-  
-        if(inp.password){
-            inp.password = await bcrypt.hash(inp.password, 10)
-        }
-        const result = await this.users.update({id:userId}, {...inp})
-        return result
+       
     }
 
     async verifyEmail(code:string):Promise<VerifyEmailOutput>{
@@ -108,12 +132,12 @@ export class UsersService {
 
             return {
                 ok:false,
-                error:'Verification failed'
+                error:'No verification code '
             }
         } catch (error) {
             return {
                 ok:false,
-                error
+                error:'Verification failed'
             }
         }
     }
