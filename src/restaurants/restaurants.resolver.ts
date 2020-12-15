@@ -1,9 +1,9 @@
 import { LoginOutput } from './../users/dtos/login.dto';
 import { CreateRestaurantDto } from './dtos/createRestaurant.dto';
 import {Args, Mutation, Query, Resolver} from '@nestjs/graphql'
-import { Restaurant } from 'src/entities/restaurant.entity';
 import { RestaurantService } from './restaurants.service';
 import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
+import { Restaurant } from './entities/restaurant.entity';
 
 @Resolver()
 export class RestaurantResolver {

@@ -1,3 +1,5 @@
+import { IsBoolean } from 'class-validator';
+import { IsString } from 'class-validator';
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { CoreEntity } from "src/common/entities/core.entity";
 import { AfterUpdate, BeforeInsert, BeforeUpdate, Column, Entity } from "typeorm";
@@ -16,11 +18,12 @@ registerEnumType(UserRoles, {name:'UserRoles'})
 export class User extends CoreEntity{
 
     @Field(()=>String)
-    @Column()
+    @Column({unique:true})
     email:string
     
     @Field(()=>String)
     @Column()
+    @IsString()
     password:string
     
     @Field(()=>UserRoles)
@@ -29,6 +32,7 @@ export class User extends CoreEntity{
     
     @Field(()=>Boolean, {nullable:true, defaultValue:false})
     @Column({default:false})
+    @IsBoolean()
     emailVerified:boolean
 
     @BeforeInsert()

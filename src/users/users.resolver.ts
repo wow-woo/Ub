@@ -61,14 +61,15 @@ export class UsersResolver {
         @Args() profile:UserProfileInp
     ):Promise<UserProfileOutput>{
         try {
-            const user = await this.userService.findById(profile.userId)
-            
-            if(!user){
+            const res = await this.userService.findById(profile.userId)
+            const { ok} = res
+
+            if(!ok){
                 throw new Error()
             }
             return {
                 ok: true,
-                user
+                user:res.user
             }
         } catch (error) {
             return {

@@ -72,14 +72,14 @@ export class UsersService {
         }
     }
 
+    // here is a issue, expected return type should have been Promise<User>
     async findById(id:number):Promise<UserProfileOutput>{
         try {
             const user = await this.users.findOneOrFail({id});
-
             return {
                 ok:true,
-                user:user
-            } 
+                user
+            }
         } catch (error) {
             return {
                 ok:false,
@@ -95,6 +95,10 @@ export class UsersService {
             if(inp.email){
                 user.email = inp.email
                 user.emailVerified = false;
+
+                //delete user verification on this user since it is 1to1 relationship
+                await this.Verifications.delete({user: {id:user.id}})
+
                 const newVerification = await this.Verifications.create({user})
                 const verification = await this.Verifications.save(newVerification)
                 this.mailService.sendVerificationEmail(user.email, verification.code)

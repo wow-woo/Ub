@@ -1,4 +1,4 @@
-import { Restaurant } from 'src/entities/restaurant.entity';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import {   Field, InputType, OmitType } from "@nestjs/graphql";
 import { IsBoolean, IsOptional, IsString, Length } from "class-validator";
 import { Column } from 'typeorm';
