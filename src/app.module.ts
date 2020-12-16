@@ -14,6 +14,8 @@ import * as Joi from 'joi'
 import { JwtMiddleware} from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
+import { Category } from './restaurants/entities/category.entity';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -52,7 +54,7 @@ import { MailerModule } from './mailer/mailer.module';
       database:process.env.DB_DATABASE,
       synchronize:process.env.NODE_ENV !== 'prod',
       logging:process.env.NODE_ENV !== 'prod',
-      entities:[User, Verification]
+      entities:[User, Verification, Restaurant, Category]
     }),
     JwtModule.forRoot({
       privateKey:process.env.PRIVATE_KEY
@@ -62,9 +64,10 @@ import { MailerModule } from './mailer/mailer.module';
       domain:process.env.MAILGUN_DOMAIN,
       fromEmail:process.env.MAILGUN_FROM_EMAIL,
     }),
+    AuthModule,
     UsersModule,
     AuthModule,
-    
+    RestaurantsModule
   ],
   controllers: [],
   providers: [],

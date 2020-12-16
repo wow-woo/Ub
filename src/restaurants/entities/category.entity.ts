@@ -1,6 +1,6 @@
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { Field, ObjectType } from "@nestjs/graphql";
-import { Column, Entity, OneToOne} from "typeorm";
+import { Column, Entity, OneToMany, OneToOne} from "typeorm";
 import { IsString } from 'class-validator';
 import { Restaurant } from './restaurant.entity';
 
@@ -8,16 +8,22 @@ import { Restaurant } from './restaurant.entity';
 @Entity()
 export class Category extends CoreEntity {
     @Field(()=> String)
-    @Column()
+    @Column({unique:true})
     name : string
     
-    @Field(()=>String)
-    @Column()
+    @Field(()=>String, { nullable:true})
+    @Column({nullable:true})
     @IsString()
     icon: string
     //coverImage
 
-    @OneToOne(()=>Restaurant, restaurants=>restaurants.category)
+    @Field(()=>String)
+    @Column({unique:true})
+    @IsString()
+    slug : string
+
+    @Field(()=>[Restaurant])
+    @OneToMany(()=>Restaurant, restaurant=>restaurant.category)
     // @Join
-    restaurants:Array<any>
+    restaurants:Restaurant[]
 }

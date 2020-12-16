@@ -1,3 +1,4 @@
+import { SetRole } from 'src/auth/role.decorator';
 import { VerifyEmailOutput, VerifyEmailInp } from './dtos/verify-email.dto';
 import { EditProfileOutput, EditProfileInp } from './dtos/edit-profile.dto';
 import { AuthGuard } from './../auth/auth.guard';
@@ -47,7 +48,7 @@ export class UsersResolver {
         }
     }
 
-    @UseGuards(AuthGuard)
+    @SetRole(['Every'])
     @Query(()=>User, {nullable:true})
     me(
         @AuthUser() authUser:User
@@ -55,7 +56,7 @@ export class UsersResolver {
         return authUser        
     }
 
-    @UseGuards(AuthGuard)
+    @SetRole(['Every'])
     @Query(()=>UserProfileOutput)
     async userProfile(
         @Args() profile:UserProfileInp
@@ -79,7 +80,7 @@ export class UsersResolver {
         }
     }
 
-    @UseGuards(AuthGuard)
+    @SetRole(['Every'])
     @Mutation(()=>EditProfileOutput)
     async editProfile(
         @AuthUser() authUser:User,
@@ -87,7 +88,7 @@ export class UsersResolver {
     ): Promise<EditProfileOutput>{
         try {
             const updated = await this.userService.editProfile(authUser.id, editInp)
-       
+
             if(!updated){
                 return {
                     ok:false,
@@ -112,7 +113,6 @@ export class UsersResolver {
         @Args('inp') {code}:VerifyEmailInp
     ){
         this.userService.verifyEmail(code)
-
     }
     
 }

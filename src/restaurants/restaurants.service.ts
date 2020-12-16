@@ -1,33 +1,54 @@
+import { User } from 'src/users/entities/user.entity';
 import { Injectable } from "@nestjs/common";
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateRestaurantDto } from './dtos/createRestaurant.dto';
-import { UpdateRestaurantDto, UpdateRestaurantType } from './dtos/update-restaurant.dto';
 import { Restaurant } from "./entities/restaurant.entity";
+import { CreateRestaurantInp, CreateRestaurantOutput } from "./dtos/createRestaurant.dto";
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class RestaurantService{
-    constructor(@InjectRepository(Restaurant) 
-    private readonly restaurants:Repository<Restaurant>
+    constructor(
+    @InjectRepository(Restaurant) 
+    private readonly restaurants:Repository<Restaurant>,
+    @InjectRepository(Category) 
+    private readonly categories:Repository<Category>
     ){}
 
     getAll():Promise<Restaurant[]>{
         return this.restaurants.find()
     }
 
-    createRestaurant(dto:CreateRestaurantDto):Promise<Restaurant>{
-        const newRestaurant = this.restaurants.create(dto)
-        return this.restaurants.save(newRestaurant)
+    async createRestaurant(
+        inp:CreateRestaurantInp,
+        owner:User, 
+        ):Promise<CreateRestaurantOutput>{
+        
+        try {
+        const newRestaurant = await this.restaurants.create(inp)
+        newRestaurant.owner = owner
+        const categoryName = inp.categoryName.trim().toLowerCase()
+        const slug = inp.categoryName.replace(/ /g, '-')
+        
+        let category = await this.categories.findOne({slug})
+        if(!category){
+            category = await this.categories.save(this.categories.create({
+                slug,
+                name:categoryName
+            }))
+        }
+        newRestaurant.category = category
+        console.log(newRestaurant)
+        const result =  await this.restaurants.save(newRestaurant)
+            return {
+                ok:true,
+            }
+        } catch (error) {
+            return {
+                ok:false,
+                error
+            }
+        }
     }
 
-    async updateRestaurant(id:number, dto:UpdateRestaurantType):Promise<UpdateResult>{
-        const isExisted = await this.restaurants.findOne(id)
-
-        if (isExisted){
-            return this.restaurants.update(id, {...dto})
-        }
-        else{
-            throw Error("data doesn't exist")
-        }
-    }
 }
