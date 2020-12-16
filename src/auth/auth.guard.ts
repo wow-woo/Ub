@@ -11,7 +11,7 @@ export class AuthGuard implements CanActivate{
     ){}
 
     //convert http context into graphql context
-    canActivate(context:ExecutionContext){
+    canActivate(context:ExecutionContext){ 
         const roles:roles = this.reflector.get(
             'role',
             context.getHandler()
@@ -26,6 +26,10 @@ export class AuthGuard implements CanActivate{
             return false
         }
 
-        return roles.includes(user.role)
+        if(roles.includes(user.role) || roles.includes('Every')){
+            return true
+        }else{
+            return false
+        }
     }
 }
