@@ -2,4 +2,4 @@
 
 Clone coding of Ub
 
-[] crud
+[] CRUD
