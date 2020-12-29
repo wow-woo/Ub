@@ -2,12 +2,12 @@ import { CategoryCustomRepository } from './repositories/category.repository';
 import { RestaurantService } from './restaurants.service';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantResolver } from './restaurants.resolver';
+import { RestaurantResolver, CategoryResolver, DishResolver } from './restaurants.resolver';
 import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantCustomRepository } from './repositories/restaurant.repository';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Restaurant, CategoryCustomRepository, RestaurantCustomRepository])],
-  providers: [RestaurantResolver, RestaurantService],
+  providers: [RestaurantResolver, CategoryResolver, DishResolver,  RestaurantService, ],
 })
 export class RestaurantsModule {}
