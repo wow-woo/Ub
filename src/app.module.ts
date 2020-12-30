@@ -1,3 +1,5 @@
+import { OrderItem } from './orders/entities/order-item.entity';
+import { Order } from './orders/entities/order.entity';
 import { Dish } from './restaurants/entities/dish.entity';
 import { Verification } from './users/entities/verification.entity';
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
@@ -16,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
 import { Category } from './restaurants/entities/category.entity';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { OrdersModule } from './orders/orders.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -54,7 +57,7 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
       database:process.env.DB_DATABASE,
       synchronize:process.env.NODE_ENV !== 'prod',
       logging:process.env.NODE_ENV !== 'prod',
-      entities:[User, Verification, Restaurant, Category, Dish]
+      entities:[User, Verification, Restaurant, Category, Dish, Order, OrderItem]
     }),
     JwtModule.forRoot({
       privateKey:process.env.PRIVATE_KEY
@@ -67,7 +70,8 @@ import { Restaurant } from './restaurants/entities/restaurant.entity';
     AuthModule,
     UsersModule,
     AuthModule,
-    RestaurantsModule
+    RestaurantsModule,
+    OrdersModule
   ],
   controllers: [],
   providers: [],

@@ -8,12 +8,20 @@ import { Column, Entity } from 'typeorm';
 import { CoreEntity } from './../../common/entities/core.entity';
 
 @ObjectType()
-class DishOption{
+export class DishChoice{
+    @Field(()=>String)
+    name?:string
+
+    @Field(()=>Number, {nullable:true})
+    extraCost?:number
+}
+@ObjectType()
+export class DishOption{
     @Field(()=>String)
     name:string
 
     @Field(()=>[String], {nullable:true})
-    choices:string[]
+    choices:DishChoice[]
 
     @Field(()=>Number, {nullable:true})
     extraCost?:number

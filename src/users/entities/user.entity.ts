@@ -1,3 +1,4 @@
+import { Order } from './../../orders/entities/order.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { IsBoolean } from 'class-validator';
 import { IsString } from 'class-validator';
@@ -39,6 +40,14 @@ export class User extends CoreEntity{
     @Column({default:false})
     @IsBoolean()
     emailVerified:boolean
+
+    @Field(()=>[Order], {nullable:true})
+    @OneToMany(()=>Order, order=>order.customer)
+    orders:Order[]
+
+    @Field(()=>[Order], {nullable:true})
+    @OneToMany(()=>Order, order=>order.driver)
+    rides:Order[]
 
     @BeforeInsert()
     async hashPassword(){

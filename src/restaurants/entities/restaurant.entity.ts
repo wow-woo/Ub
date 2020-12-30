@@ -1,3 +1,4 @@
+import { Order } from './../../orders/entities/order.entity';
 import { Dish } from './dish.entity';
 import { RestaurantsModule } from './../restaurants.module';
 import { CoreEntity } from 'src/common/entities/core.entity';
@@ -37,6 +38,13 @@ export class Restaurant extends CoreEntity {
         user=>user.restaurants,
         {onDelete:'CASCADE'})
     owner:User
+
+    @Field(()=>[Order], {nullable: true})
+    @OneToMany(
+        ()=>Order, 
+        order=>order.restaurant,
+        {nullable: true,onDelete:'SET NULL'})
+    orders?:Order[]
 
     @RelationId((entity:Restaurant)=>entity.owner)
     ownerId:number
