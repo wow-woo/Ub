@@ -15,8 +15,8 @@ class DishOption{
     @Field(()=>[String], {nullable:true})
     choices:string[]
 
-    @Field(()=>Number)
-    extraPrice:number
+    @Field(()=>Number, {nullable:true})
+    extraCost?:number
 }
 
 @ObjectType()
