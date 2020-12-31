@@ -1,5 +1,5 @@
 import { OrderItem } from './order-item.entity';
-import { JoinTable, ManyToMany, OneToMany } from 'typeorm';
+import { JoinTable, ManyToMany, OneToMany, RelationId } from 'typeorm';
 import { Dish } from './../../restaurants/entities/dish.entity';
 import { Restaurant } from './../../restaurants/entities/restaurant.entity';
 import { User } from './../../users/entities/user.entity';
@@ -56,4 +56,11 @@ export class Order extends CoreEntity{
     @IsEnum(OrderStatus)
     @Column({type:'enum', enum:OrderStatus})
     status: OrderStatus
+
+    @RelationId((order:Order)=>order.customer)
+    customerId:number
+
+    @RelationId((order:Order)=>order.driver)
+    driverId:number
+
 }

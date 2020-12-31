@@ -1,3 +1,6 @@
+import { GetOrderOutput, GetOrderInp } from './dtos/get-order.dto';
+import { Query } from '@nestjs/graphql';
+import { GetOrdersOutput, GetOrdersInp } from './dtos/get-orders.dto';
 import { SetRole } from './../auth/role.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { AuthUser } from './../auth/auth-user.decorator';
@@ -20,5 +23,23 @@ export class OrderResolver{
         @Args('inp') inp:CreateOrderInp 
     ):Promise<CreateOrderOutput>{
         return this.ordersService.createOrder(customer, inp)
+    }
+
+    @SetRole(['Every'])
+    @Query(()=>GetOrdersOutput)
+    async getOrders(
+        @AuthUser() user:User,
+        @Args() inp:GetOrdersInp
+    ):Promise<GetOrdersOutput>{
+        return this.ordersService.getOrders(user, inp)
+    }
+
+    @SetRole(['Every'])
+    @Query(()=>GetOrderOutput)
+    async getOrder(
+        @AuthUser() user:User,
+        @Args() inp:GetOrderInp
+    ):Promise<GetOrderOutput>{
+        return this.ordersService.getOrder(user, inp)
     }
 }

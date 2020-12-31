@@ -9,11 +9,8 @@ export class OrderItemOption{
     @Field(()=>String)
     name : string
 
-    @Field(()=>DishChoice, {nullable:true})
-    choice?: DishChoice
-
-    @Field(()=>Number, {nullable:true})
-    extra?:number
+    @Field(()=>String, {nullable:true})
+    choice?: String
 }
 
 @ObjectType()
